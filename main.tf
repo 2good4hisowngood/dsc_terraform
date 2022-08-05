@@ -1,28 +1,25 @@
-provider "aws" {
-  region = var.region
-}
+resource "azurerm_policy_virtual_machine_configuration_assignment" "vm_policies" {
+  for_each =  local.all_data_map
+  
+  name               = each.value.config_name
+  location           = each.value.vm_location
+  virtual_machine_id = each.value.vm_id
 
-data "aws_ami" "ubuntu" {
-  most_recent = true
+  configuration {
+      content_uri = each.value.content_uri
+      content_hash = each.value.content_hash
+      assignment_type = "ApplyAndAutoCorrect"
+      version = "1.0.0.0"
 
-  filter {
-    name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
+      dynamic "parameter" {
+        for_each = configuration.value.parameters
+        
+        name = parameter.value.name
+        value = parameter.value.value
+      }
   }
 
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-
-  owners = ["099720109477"] # Canonical
-}
-
-resource "aws_instance" "ubuntu" {
-  ami           = data.aws_ami.ubuntu.id
-  instance_type = var.instance_type
-
-  tags = {
-    Name = var.instance_name
-  }
+  depends_on = [
+    var.policy_map
+  ]
 }

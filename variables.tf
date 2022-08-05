@@ -1,15 +1,16 @@
-variable "region" {
-  description = "AWS region"
-  default     = "us-west-1"
+variable "vm_list" {
+  description = "List output of concatonated VMs from separate Terraform apply."
 }
 
-variable "instance_type" {
-  description = "Type of EC2 instance to provision"
-  default     = "t2.micro"
+variable "dsc_json_values_file" {
+    description = "url to download json file"
+    type = string 
 }
 
-variable "instance_name" {
-  description = "EC2 instance name"
-  default     = "Provisioned by Terraform"
+data "http" "policies" {
+  url = var.dsc_json_values_file
 }
 
+variable "token" {
+  description = "Terraform Cloud API Token"
+}
